@@ -1,5 +1,2 @@
-﻿  main.cpp
-c:\users\sev\documents\visual studio 2017\projects\fftio\fftio\main.cpp(30): warning C4101: 'y_magnitude': unreferenced local variable
-c:\users\sev\documents\visual studio 2017\projects\fftio\fftio\main.cpp(29): warning C4101: 'x_sample': unreferenced local variable
-  FFTio.vcxproj -> c:\users\sev\documents\visual studio 2017\Projects\FFTio\Debug\FFTio.exe
-  FFTio.vcxproj -> c:\users\sev\documents\visual studio 2017\Projects\FFTio\Debug\FFTio.pdb (Partial PDB)
+﻿  FFTio.vcxproj -> C:\Users\Sev\documents\visual studio 2017\Projects\FFTio\Debug\FFTio.exe
+  FFTio.vcxproj -> C:\Users\Sev\documents\visual studio 2017\Projects\FFTio\Debug\FFTio.pdb (Partial PDB)

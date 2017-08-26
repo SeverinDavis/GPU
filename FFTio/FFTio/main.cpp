@@ -2,16 +2,18 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
+#include <vector>
 
 using namespace std;
 
-int main()
-{
 
+bool read_input(std::vector<int>* input, string filename)
+{
+	input->clear();
 	//read file
 	ifstream inputFile;
 	cout << "Opening input file: ";
-	inputFile.open("input.csv", ifstream::in);
+	inputFile.open(filename, ifstream::in); //input.csv
 	//verify that file is open
 	if (inputFile.is_open())
 	{
@@ -21,31 +23,61 @@ int main()
 	{
 		cout << "FAIL" << endl;
 		cout << "Exiting..." << endl;
-		return 1;
+		return false;
 	}
 
 	string inputLine;
-	string x;
-	int x_sample;
-	int y_magnitude;
-
-	int a = 0;
 
 	//count number of lines (samples) in file
 	while (getline(inputFile, inputLine))
 	{
-		a++;
+		int sample;
+		try
+		{
+			sample = std::stoi(inputLine);
+		}
+		catch (...)
+		{
+			return false;
+		
+		}
+		input->push_back(sample);
 	}
 
-	cout << "Input has " << a << " samples." << endl;
+	cout << "Input has " << input->size() << " samples." << endl;
 
 	//check sample size for usability
 	//TODO
-	if (a < 1)
+	if (input->size() == 0)
 	{
 		cout << "Input size is not valid. Exiting..." << endl;
-		return 1;
+		return false;
 	}
+
+	return true;
+}
+
+
+
+int main()
+{
+
+	std::vector<int> h_input;
+
+	if (read_input(&h_input, "input.txt"))
+	{
+		cout << "Input has " << h_input.size() << " samples." << endl;
+
+	
+	}
+	else
+	{
+	//fail
+	
+	}
+
+
+
 
 	system("pause");
 
