@@ -3,27 +3,39 @@
 #include <sstream>
 #include <stdlib.h>
 #include <vector>
+#include <math.h>
+
+#include "floatc.h"
 
 using namespace std;
 
+int read_input(std::vector<floatc>* input, string filename);
+void print_vector(std::vector<floatc>* input);
 
-bool read_input(std::vector<int>* input, string filename)
+void print_vector(std::vector<floatc>* input)
+{
+	for (int i = 0; i < input->size(); i++)
+	{
+		cout << floatc_to_string(input->at(i)) << endl;
+	}
+}
+
+
+int read_input(std::vector<floatc>* input, string filename)
 {
 	input->clear();
 	//read file
 	ifstream inputFile;
-	cout << "Opening input file: ";
 	inputFile.open(filename, ifstream::in); //input.csv
 	//verify that file is open
 	if (inputFile.is_open())
 	{
-		cout << "SUCCESS" << endl;
+		//log success
 	}
 	else
 	{
-		cout << "FAIL" << endl;
-		cout << "Exiting..." << endl;
-		return false;
+		//log fail
+		return -1;
 	}
 
 	string inputLine;
@@ -31,28 +43,41 @@ bool read_input(std::vector<int>* input, string filename)
 	//count number of lines (samples) in file
 	while (getline(inputFile, inputLine))
 	{
-		int sample;
+		floatc sample;
+		sample.imag = 0;
 		try
 		{
-			sample = std::stoi(inputLine);
+			sample.real = std::stof(inputLine);
 		}
 		catch (...)
 		{
-			return false;
+			return -1;
 		
 		}
 		input->push_back(sample);
 	}
 
-	cout << "Input has " << input->size() << " samples." << endl;
-
 	//check sample size for usability
 	//TODO
-	if (input->size() == 0)
+	if (input->size() < 2)
 	{
-		cout << "Input size is not valid. Exiting..." << endl;
-		return false;
+		return -1;
 	}
+
+	int powertwo = 2;
+
+	while (powertwo < input->size())
+		powertwo = powertwo * 2;
+
+	while (input->size() != powertwo)
+	{
+		floatc sample;
+		sample.imag = 0;
+		sample.real = 0;
+		input->push_back(sample);
+	}
+
+
 
 	return true;
 }
@@ -60,15 +85,12 @@ bool read_input(std::vector<int>* input, string filename)
 
 
 int main()
-{
-
-	std::vector<int> h_input;
+{	
+	std::vector<floatc> h_input;
 
 	if (read_input(&h_input, "input.txt"))
 	{
 		cout << "Input has " << h_input.size() << " samples." << endl;
-
-	
 	}
 	else
 	{
@@ -76,8 +98,7 @@ int main()
 	
 	}
 
-
-
+	print_vector(&h_input);
 
 	system("pause");
 
