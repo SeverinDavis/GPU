@@ -11,9 +11,12 @@ using namespace std;
 
 int read_input(std::vector<floatc>* input, string filename);
 void print_vector(std::vector<floatc>* input);
+std::vector<floatc> reorder_input(std::vector<floatc> input);
+
 
 void print_vector(std::vector<floatc>* input)
 {
+	cout << endl;
 	for (int i = 0; i < input->size(); i++)
 	{
 		cout << floatc_to_string(input->at(i)) << endl;
@@ -83,6 +86,36 @@ int read_input(std::vector<floatc>* input, string filename)
 }
 
 
+std::vector<floatc> reorder_input(std::vector<floatc> input)
+{
+	//check base case
+	if (input.size() <= 2)
+		return input;
+
+	//create temporary reorder vectors
+	//copy input vector into first reorder vector
+
+	std::vector<floatc> even(input.size()/2);
+	std::vector<floatc> odd(input.size()/2);
+
+	//split even and odd indices
+	for (unsigned int i = 0; i < even.size(); i++)
+	{
+		even.at(i) = input.at(i * 2);
+		odd.at(i) = input.at((i * 2) + 1);
+	}
+
+	even = reorder_input(even);
+	odd = reorder_input(odd);
+
+	std::vector<floatc> result;
+	result.reserve(input.size());
+	result.insert(result.end(), even.begin(), even.end());
+	result.insert(result.end(), odd.begin(), odd.end());
+
+	return result;
+}
+
 
 int main()
 {	
@@ -99,7 +132,8 @@ int main()
 	}
 
 	print_vector(&h_input);
-
+	h_input = reorder_input(h_input);
+	print_vector(&h_input);
 	system("pause");
 
 	

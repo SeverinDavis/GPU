@@ -1,5 +1,5 @@
 ﻿  main.cpp
-c:\users\sev\documents\github\gpu\fftio\fftio\main.cpp(17): warning C4018: '<': signed/unsigned mismatch
-c:\users\sev\documents\github\gpu\fftio\fftio\main.cpp(69): warning C4018: '<': signed/unsigned mismatch
+c:\users\sev\documents\github\gpu\fftio\fftio\main.cpp(20): warning C4018: '<': signed/unsigned mismatch
+c:\users\sev\documents\github\gpu\fftio\fftio\main.cpp(72): warning C4018: '<': signed/unsigned mismatch
   FFTio.vcxproj -> C:\Users\Sev\Documents\GitHub\GPU\FFTio\Debug\FFTio.exe
   FFTio.vcxproj -> C:\Users\Sev\Documents\GitHub\GPU\FFTio\Debug\FFTio.pdb (Partial PDB)
