@@ -79,9 +79,6 @@ int read_input(std::vector<floatc>* input, string filename)
 		sample.real = 0;
 		input->push_back(sample);
 	}
-
-
-
 	return true;
 }
 
@@ -92,9 +89,7 @@ std::vector<floatc> reorder_input(std::vector<floatc> input)
 	if (input.size() <= 2)
 		return input;
 
-	//create temporary reorder vectors
-	//copy input vector into first reorder vector
-
+	//create even and odd index reorder vectors
 	std::vector<floatc> even(input.size()/2);
 	std::vector<floatc> odd(input.size()/2);
 
@@ -105,9 +100,11 @@ std::vector<floatc> reorder_input(std::vector<floatc> input)
 		odd.at(i) = input.at((i * 2) + 1);
 	}
 
+	//recursive call to reorder even and odd index vectors
 	even = reorder_input(even);
 	odd = reorder_input(odd);
 
+	//regroup returned vectors and return
 	std::vector<floatc> result;
 	result.reserve(input.size());
 	result.insert(result.end(), even.begin(), even.end());
@@ -136,5 +133,4 @@ int main()
 	print_vector(&h_input);
 	system("pause");
 
-	
 }
