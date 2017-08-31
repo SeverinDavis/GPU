@@ -113,6 +113,24 @@ std::vector<floatc> reorder_input(std::vector<floatc> input)
 	return result;
 }
 
+std::vector<floatc> fft_cpu(std::vector<floatc> input)
+{
+	std::vector<floatc> result(input);
+	//for(unsigned int stage = 0;
+
+
+	return result;
+}
+
+unsigned int thread_index_map(unsigned int thread_id, unsigned int stage)
+{
+	//inputs are 1, 2, 4,8, etc. for the number of stages.
+	unsigned int index = (stage * 2 * (thread_id / stage)) + thread_id % stage;
+	cout <<"Stage " << stage << ": Thread " << thread_id << ", index " << index << endl;
+	return index;
+}
+
+
 
 int main()
 {	
@@ -131,6 +149,14 @@ int main()
 	print_vector(&h_input);
 	h_input = reorder_input(h_input);
 	print_vector(&h_input);
-	system("pause");
 
+	for (unsigned int j = 1; j <= 8; j = j*2)
+	{
+		for (unsigned int i = 0; i < 8; i++)
+		{
+			thread_index_map(i, j);
+		}
+	}
+		
+		system("pause");
 }
