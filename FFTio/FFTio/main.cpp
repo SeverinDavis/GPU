@@ -123,7 +123,7 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 {
 	std::vector<doublec> result(input);
 	std::vector<doublec> roots;
-	roots.reserve(input.size());
+	roots.reserve(input.size()/2);
 
 	//populate root vector with empty complex numbers
 	for (unsigned int i = 0; i < roots.capacity(); i++)
@@ -134,21 +134,20 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 		roots.push_back(root);
 	}
 
-	//calculate half of the roots and then fill in the other half via inversion
+	//calculate half of the roots
 	//we do this to match the number of threads (size/2) that run on the OpenCL implementation
-	//each thread effectively generates and populates two slots of the full root circle
-	for (unsigned int i = 0; i < roots.capacity()/2; i++)
+	for (unsigned int i = 0; i < roots.capacity(); i++)
 	{
-		double arg = (2 * pi * (double)i) / ((double)roots.capacity());
-		roots.at(((roots.capacity() - i)%roots.capacity())).real = cos(arg);
-		roots.at(((roots.capacity() - i) % roots.capacity())).imag = sin(arg);
-
-		roots.at(((roots.capacity() - i + roots.capacity() / 2) % roots.capacity())).real = -1 * cos(arg);
-		roots.at(((roots.capacity() - i + roots.capacity() / 2) % roots.capacity())).imag = -1 * sin(arg);
+		double arg = (2 * pi * (double)i) / ((double)result.capacity());
+		roots.at(i).real = cos(arg);
+		roots.at(i).imag = -1 * sin(arg);
 	}
 
+#ifdef DEBUG
+	cout << "unity roots";
 	print_vector(&roots);
-
+	cout << endl;
+#endif
 
 	//threads always operate on pairs of indices in each stage
 	//so we start half as many threads as the input size
@@ -159,9 +158,13 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 	unsigned int istage = num_of_threads;
 	for (unsigned int estage = 1; estage <= num_of_threads; estage = estage * 2)
 	{
+#ifdef DEBUG
 		cout << "STAGE " << estage << endl;
+#endif
 		//the inner loops simply executes our "threads".
 		//this will be parallelized in the opencl implementation
+		//runtime for this is n
+		//total for fft serial execution is nlogn
 		for (unsigned int thread_id = 0; thread_id < num_of_threads; thread_id++)
 		{
 			//we query for our home and target indeces
@@ -169,18 +172,20 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 			unsigned int home_index = thread_index_map(thread_id, estage);
 			unsigned int target_index = home_index + estage;
 			unsigned int home_root = thread_root_map(thread_id, estage, istage);
+#ifdef DEBUG
 			cout << "t" << thread_id << ": " << "hi" << home_index << ", ti" << target_index << endl;
 			cout << "t" << thread_id << ": " << "hr" << home_root << endl;
+#endif
 
 			doublec pq = doublec_mul(result.at(target_index), roots.at(home_root));
-
 			doublec top = doublec_add(pq, result.at(home_index));
 			doublec bottom = doublec_sub(result.at(home_index), pq);
 			result.at(home_index) = top;
 			result.at(target_index) = bottom;
-
 		}
+#ifdef DEBUG
 		cout << endl;
+#endif
 		istage = istage / 2;
 	}
 	return result;
@@ -190,14 +195,12 @@ unsigned int thread_index_map(unsigned int thread_id, unsigned int stage)
 {
 	//inputs are 1, 2, 4,8, etc. for the number of stages.
 	unsigned int index = (stage * 2 * (thread_id / stage)) + thread_id % stage;
-	//cout <<"Stage " << stage << ": Thread " << thread_id << ", index " << index << endl;
 	return index;
 }
 
 unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsigned int istage)
 {
 	return istage *  (thread_id % estage);
-	//return (thread_id % stage);
 }
 
 
@@ -212,26 +215,27 @@ int main()
 	}
 	else
 	{
-	//fail
-	
+		cout << "Input invalid" << endl;
+		return 1;
 	}
 
+	cout << "raw input";
 	print_vector(&h_input);
+	cout << endl;
+
 	h_input = reorder_input(h_input);
+
+#ifdef DEBUG
+	cout << "reordered input";
 	print_vector(&h_input);
+	cout << endl;
+#endif
 
 	vector<doublec> result = fft_cpu(h_input);
 
+	cout << "fft result";
 	print_vector(&result);
-
-
-	for (unsigned int j = 1; j <= 8; j = j*2)
-	{
-		for (unsigned int i = 0; i < 8; i++)
-		{
-			thread_index_map(i, j);
-		}
-	}
+	cout << endl;
 		
-		system("pause");
+	system("pause");
 }
