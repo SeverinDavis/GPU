@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="floatc.h">
+    <ClInclude Include="doublec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
