@@ -8,3 +8,5 @@ FFTio/FFTio/Debug/vc141.idb
 *.ilk
 *.pdb
 *.exe
+*.tlog
+*.log
