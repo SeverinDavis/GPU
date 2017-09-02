@@ -169,12 +169,13 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 			unsigned int home_index = thread_index_map(thread_id, estage);
 			unsigned int target_index = home_index + estage;
 			unsigned int home_root = thread_root_map(thread_id, estage, istage);
-			unsigned int target_root = home_root + (num_of_threads);
 			cout << "t" << thread_id << ": " << "hi" << home_index << ", ti" << target_index << endl;
-			cout << "t" << thread_id << ": " << "hr" << home_root << ", tr" << target_root << endl;
+			cout << "t" << thread_id << ": " << "hr" << home_root << endl;
 
-			doublec top = doublec_add(doublec_mul(result.at(target_index), roots.at(home_root)), result.at(home_index));
-			doublec bottom = doublec_add(doublec_mul(result.at(target_index), roots.at(target_root)), result.at(home_index));
+			doublec pq = doublec_mul(result.at(target_index), roots.at(home_root));
+
+			doublec top = doublec_add(pq, result.at(home_index));
+			doublec bottom = doublec_sub(result.at(home_index), pq);
 			result.at(home_index) = top;
 			result.at(target_index) = bottom;
 
@@ -219,7 +220,9 @@ int main()
 	h_input = reorder_input(h_input);
 	print_vector(&h_input);
 
-	fft_cpu(h_input);
+	vector<doublec> result = fft_cpu(h_input);
+
+	print_vector(&result);
 
 
 	for (unsigned int j = 1; j <= 8; j = j*2)
