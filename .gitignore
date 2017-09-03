@@ -10,3 +10,5 @@ FFTio/FFTio/Debug/vc141.idb
 *.exe
 *.tlog
 *.log
+*.db
+*.suo

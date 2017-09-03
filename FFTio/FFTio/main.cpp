@@ -193,9 +193,7 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 
 unsigned int thread_index_map(unsigned int thread_id, unsigned int stage)
 {
-	//inputs are 1, 2, 4,8, etc. for the number of stages.
-	unsigned int index = (stage * 2 * (thread_id / stage)) + thread_id % stage;
-	return index;
+	return (stage * 2 * (thread_id / stage)) + thread_id % stage;
 }
 
 unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsigned int istage)
