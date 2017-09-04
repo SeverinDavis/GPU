@@ -12,3 +12,13 @@ FFTio/FFTio/Debug/vc141.idb
 *.log
 *.db
 *.suo
+*.suo
+*.db
+*.user
+*.ipdb
+*.ipch
+*.iobj
+*.vcxproj
+*.ipch
+*.filters
+*.ipch

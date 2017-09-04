@@ -5,20 +5,23 @@
 #include <vector>
 #include <math.h>
 
+#include <CL/cl.hpp>
+#include <CL/opencl.h>
+
 #include "doublec.h"
 
 #define pi 3.141592653589
 
 using namespace std;
 
-int read_input(std::vector<doublec>* input, string filename);
-void print_vector(std::vector<doublec>* input);
-std::vector<doublec> reorder_input(std::vector<doublec> input);
+int read_input(std::vector<cl_double2>* input, string filename);
+void print_vector(std::vector<cl_double2>* input);
+std::vector<cl_double2> reorder_input(std::vector<cl_double2> input);
 unsigned int thread_index_map(unsigned int thread_id, unsigned int stage);
 unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsigned int istage);
 
 
-void print_vector(std::vector<doublec>* input)
+void print_vector(std::vector<cl_double2>* input)
 {
 	cout << endl;
 	for (unsigned int i = 0; i < input->size(); i++)
@@ -28,7 +31,7 @@ void print_vector(std::vector<doublec>* input)
 }
 
 
-int read_input(std::vector<doublec>* input, string filename)
+int read_input(std::vector<cl_double2>* input, string filename)
 {
 	input->clear();
 	//read file
@@ -50,11 +53,11 @@ int read_input(std::vector<doublec>* input, string filename)
 	//count number of lines (samples) in file
 	while (getline(inputFile, inputLine))
 	{
-		doublec sample;
-		sample.imag = 0;
+		cl_double2 sample;
+		sample.y = 0;
 		try
 		{
-			sample.real = std::stof(inputLine);
+			sample.x = std::stof(inputLine);
 		}
 		catch (...)
 		{
@@ -80,24 +83,24 @@ int read_input(std::vector<doublec>* input, string filename)
 	//pad input vector with 0s until it's a power of two size
 	while (input->size() != powertwo)
 	{
-		doublec sample;
-		sample.imag = 0;
-		sample.real = 0;
+		cl_double2 sample;
+		sample.x = 0;
+		sample.y = 0;
 		input->push_back(sample);
 	}
 	return true;
 }
 
 
-std::vector<doublec> reorder_input(std::vector<doublec> input)
+std::vector<cl_double2> reorder_input(std::vector<cl_double2> input)
 {
 	//check base case
 	if (input.size() <= 2)
 		return input;
 
 	//create even and odd index reorder vectors
-	std::vector<doublec> even(input.size()/2);
-	std::vector<doublec> odd(input.size()/2);
+	std::vector<cl_double2> even(input.size()/2);
+	std::vector<cl_double2> odd(input.size()/2);
 
 	//split even and odd indices
 	for (unsigned int i = 0; i < even.size(); i++)
@@ -111,7 +114,7 @@ std::vector<doublec> reorder_input(std::vector<doublec> input)
 	odd = reorder_input(odd);
 
 	//regroup returned vectors and return
-	std::vector<doublec> result;
+	std::vector<cl_double2> result;
 	result.reserve(input.size());
 	result.insert(result.end(), even.begin(), even.end());
 	result.insert(result.end(), odd.begin(), odd.end());
@@ -119,18 +122,18 @@ std::vector<doublec> reorder_input(std::vector<doublec> input)
 	return result;
 }
 
-std::vector<doublec> fft_cpu(std::vector<doublec> input)
+std::vector<cl_double2> fft_cpu(std::vector<cl_double2> input)
 {
-	std::vector<doublec> result(input);
-	std::vector<doublec> roots;
+	std::vector<cl_double2> result(input);
+	std::vector<cl_double2> roots;
 	roots.reserve(input.size()/2);
 
 	//populate root vector with empty complex numbers
 	for (unsigned int i = 0; i < roots.capacity(); i++)
 	{
-		doublec root;
-		root.real = 0;
-		root.imag = 0;
+		cl_double2 root;
+		root.x = 0;
+		root.y = 0;
 		roots.push_back(root);
 	}
 
@@ -139,8 +142,8 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 	for (unsigned int i = 0; i < roots.capacity(); i++)
 	{
 		double arg = (2 * pi * (double)i) / ((double)result.capacity());
-		roots.at(i).real = cos(arg);
-		roots.at(i).imag = -1 * sin(arg);
+		roots.at(i).x = cos(arg);
+		roots.at(i).y = -1 * sin(arg);
 	}
 
 #ifdef DEBUG
@@ -151,7 +154,7 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 
 	//threads always operate on pairs of indices in each stage
 	//so we start half as many threads as the input size
-	unsigned int num_of_threads = result.size() / 2;
+	unsigned int num_of_threads = (unsigned int)(result.size() / 2);
 
 	//we maintain a power of two up counter and a power of two down counter to avoid exp or log functions
 	//here we loop through the stages which has a runtime complexity of log(n)
@@ -177,9 +180,9 @@ std::vector<doublec> fft_cpu(std::vector<doublec> input)
 			cout << "t" << thread_id << ": " << "hr" << home_root << endl;
 #endif
 
-			doublec pq = doublec_mul(result.at(target_index), roots.at(home_root));
-			doublec top = doublec_add(pq, result.at(home_index));
-			doublec bottom = doublec_sub(result.at(home_index), pq);
+			cl_double2 pq = doublec_mul(result.at(target_index), roots.at(home_root));
+			cl_double2 top = doublec_add(pq, result.at(home_index));
+			cl_double2 bottom = doublec_sub(result.at(home_index), pq);
 			result.at(home_index) = top;
 			result.at(target_index) = bottom;
 		}
@@ -201,11 +204,50 @@ unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsign
 	return istage *  (thread_id % estage);
 }
 
+void opencl()
+{
+	// Create a context
+	//cl::Context context(CL_DEVICE_TYPE_GPU);
+	std::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+	if (platforms.size() == 0) {
+		std::cerr << "No platforms found" << std::endl;
+		return;
+	}
+	int platformId = 0;
+	for (size_t i = 0; i < platforms.size(); i++) {
+		
+		cout << platforms[i].getInfo<CL_PLATFORM_NAME>() << endl;
+		platformId = i;
+			
+		
+	}
+	cl_context_properties prop[4] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[platformId](), 0, 0 };
+	std::cout << "Using platform '" << platforms[platformId].getInfo<CL_PLATFORM_NAME>() << "' from '" << platforms[platformId].getInfo<CL_PLATFORM_VENDOR>() << "'" << std::endl;
+	cl::Context context(CL_DEVICE_TYPE_GPU, prop);
 
+	// Get a device of the context
+	std::cout << "Context has " << context.getInfo<CL_CONTEXT_DEVICES>().size() << " devices" << std::endl;
+	cl::Device device = context.getInfo<CL_CONTEXT_DEVICES>()[0];
+	std::vector<cl::Device> devices;
+	devices.push_back(device);
+
+	// Create a command queue
+	cl::CommandQueue queue(context, device, CL_QUEUE_PROFILING_ENABLE);
+
+	// Load the source code
+	//cl::Program program = OpenCL::loadProgramSource(context, "src/fft.cl");
+	// Compile the source code. This is similar to program.build(devices) but will print more detailed error messages
+	//OpenCL::buildProgram(program, devices);
+
+	// Create a kernel object
+	//cl::Kernel fftKernel(program, "fftKernel");
+
+}
 
 int main()
 {	
-	std::vector<doublec> h_input;
+	std::vector<cl_double2> h_input;
 
 	if (read_input(&h_input, "input.txt"))
 	{
@@ -229,11 +271,12 @@ int main()
 	cout << endl;
 #endif
 
-	vector<doublec> result = fft_cpu(h_input);
+	vector<cl_double2> result = fft_cpu(h_input);
 
 	cout << "fft result";
 	print_vector(&result);
 	cout << endl;
 		
+	//opencl();
 	system("pause");
 }

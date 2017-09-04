@@ -2,49 +2,43 @@
 #define DOUBLEC_H
 
 #include <iostream>
+
 using namespace std;
 
-typedef struct
+cl_double2 doublec_add(cl_double2 a, cl_double2 b)
 {
-	double real;
-	double imag;
-} doublec;
-
-
-doublec doublec_add(doublec a, doublec b)
-{
-	doublec c;
-	c.real = a.real + b.real;
-	c.imag = a.imag + b.imag;
+	cl_double2 c;
+	c.x = a.x + b.x;
+	c.y = a.y + b.y;
 	return c;
 }
 
 
-doublec doublec_sub(doublec a, doublec b)
+cl_double2 doublec_sub(cl_double2 a, cl_double2 b)
 {
-	doublec c;
-	c.real = a.real - b.real;
-	c.imag = a.imag - b.imag;
+	cl_double2 c;
+	c.x = a.x - b.x;
+	c.y = a.y - b.y;
 	return c;
 }
 
 
-doublec doublec_mul(doublec a, doublec b)
+cl_double2 doublec_mul(cl_double2 a, cl_double2 b)
 {
-	doublec c;
-	c.real = a.real*b.real - a.imag*b.imag;
-	c.imag = a.imag*b.real + a.real*b.imag;
+	cl_double2 c;
+	c.x = a.x*b.x - a.y*b.y;
+	c.y = a.y*b.x + a.x*b.y;
 	return c;
 }
 
 
-string doublec_to_string(doublec a)
+string doublec_to_string(cl_double2 a)
 {
-	string real = to_string(a.real);
-	string imag = to_string(a.imag);
-	if (a.imag < 0)
+	string real = to_string(a.x);
+	string imag = to_string(a.y);
+	if (a.y < 0)
 	{
-		imag = to_string(-1 * a.imag);
+		imag = to_string(-1 * a.y);
 		return real + " -" + imag + "i";
 	}
 		
