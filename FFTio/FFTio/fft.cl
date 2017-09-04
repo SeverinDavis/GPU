@@ -2,6 +2,16 @@
 #include <OpenCL/OpenCLKernel.hpp> // Hack to make syntax highlighting in Eclipse work
 #endif
 
+unsigned int thread_index_map(unsigned int thread_id, unsigned int stage)
+{
+	return (stage * 2 * (thread_id / stage)) + thread_id % stage;
+}
+
+unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsigned int istage)
+{
+	return istage *  (thread_id % estage);
+}
+
 __kernel void fftKernel(__global double2* d_output, __global double2* d_input, __global double2* d_roots) {
 
 	size_t i = get_global_id(0);
