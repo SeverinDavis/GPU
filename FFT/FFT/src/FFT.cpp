@@ -21,17 +21,13 @@
 using namespace Core;
 using namespace std;
 
-
-
 #define pi 3.14159265359f
-
 
 int read_input(std::vector<cl_float2>* input, string filename);
 void print_vector(std::vector<cl_float2>* input);
 std::vector<cl_float2> reorder_input(std::vector<cl_float2> input);
 unsigned int thread_index_map(unsigned int thread_id, unsigned int stage);
 unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsigned int istage);
-
 
 void print_vector(std::vector<cl_float2>* input)
 {
@@ -41,7 +37,6 @@ void print_vector(std::vector<cl_float2>* input)
 		cout << doublec_to_string(input->at(i)) << endl;
 	}
 }
-
 
 int read_input(std::vector<cl_float2>* input, string filename)
 {
@@ -251,8 +246,6 @@ std::vector<cl_float2>  opencl(std::vector<cl_float2> input, Core::TimeSpan *gpu
 
 		//cout << platforms[i].getInfo<CL_PLATFORM_NAME>() << endl;
 		platformId = i;
-
-
 	}
 	cl_context_properties prop[4] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[platformId](), 0, 0 };
 	//std::cout << "Using platform '" << platforms[platformId].getInfo<CL_PLATFORM_NAME>() << "' from '" << platforms[platformId].getInfo<CL_PLATFORM_VENDOR>() << "'" << std::endl;
@@ -271,7 +264,6 @@ std::vector<cl_float2>  opencl(std::vector<cl_float2> input, Core::TimeSpan *gpu
 	cl::Program program = OpenCL::loadProgramSource(context, "src/FFT.cl");
 	// Compile the source code. This is similar to program.build(devices) but will print more detailed error messages
 	OpenCL::buildProgram(program, devices);
-
 
 	std::size_t data_size = input.size()*sizeof(cl_float2);
 	cl::Buffer d_data(context, CL_MEM_READ_WRITE, data_size);
@@ -331,7 +323,6 @@ void speed_test(unsigned int size)
 		Core::TimeSpan cpuTime = cpuEnd - cpuStart;
 		cout << "CPU, " << vector_size << ", " << cpuTime << endl;
 
-
 		//GPU
 		Core::TimeSpan gpuTime = Core::getCurrentTime();
 		vector<cl_float2> resultgpu = opencl(test, &gpuTime);
@@ -374,7 +365,6 @@ int main()
 
 	Core::TimeSpan cpuTime = cpuEnd - cpuStart;
 
-
 	cout << "fft result";
 	print_vector(&result);
 	cout << endl;
@@ -382,13 +372,11 @@ int main()
 	Core::TimeSpan gpuTime = Core::getCurrentTime();
 	vector<cl_float2> resultgpu = opencl(h_input, &gpuTime);
 
-
 	cout << "opencl result";
 	print_vector(&resultgpu);
 	cout << endl;
 
 	cout << "Found errors in " << error_calculator(result,resultgpu) << " values" << endl;
-
 
 	cout << "Total time in CPU is " << cpuTime << endl;
 	cout << "Total time in GPU is " << gpuTime << endl;

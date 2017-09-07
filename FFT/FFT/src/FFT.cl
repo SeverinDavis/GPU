@@ -14,7 +14,6 @@ unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsign
 	return istage *  (thread_id % estage);
 }
 
-
 float2 doublec_add(float2 a, float2 b)
 {
 	float2 c;
@@ -23,7 +22,6 @@ float2 doublec_add(float2 a, float2 b)
 	return c;
 }
 
-
 float2 doublec_sub(float2 a, float2 b)
 {
 	float2 c;
@@ -31,7 +29,6 @@ float2 doublec_sub(float2 a, float2 b)
 	c.y = a.y - b.y;
 	return c;
 }
-
 
 float2 doublec_mul(float2 a, float2 b)
 {
@@ -53,10 +50,6 @@ __kernel void fftKernel(__global float2* d_input, __global float2* d_roots) {
 	d_roots[i].y = -1 * sin(arg);
 
 	barrier(CLK_GLOBAL_MEM_FENCE);
-
-
-	//we maintain a power of two up counter and a power of two down counter to avoid exp or log functions
-	//here we loop through the stages which has a runtime complexity of log(n)
 
 	unsigned int istage = count;
 	for (unsigned int estage = 1; estage <= count; estage = estage * 2)
