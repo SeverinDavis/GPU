@@ -12,7 +12,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "doublec.hpp"
+#include "floatc.hpp"
 
 using namespace Core;
 using namespace std;
@@ -30,7 +30,7 @@ void print_vector(std::vector<cl_float2>* input)
 	cout << endl;
 	for (unsigned int i = 0; i < input->size(); i++)
 	{
-		cout << doublec_to_string(input->at(i)) << endl;
+		cout << floatc_to_string(input->at(i)) << endl;
 	}
 }
 
@@ -61,7 +61,7 @@ int read_input(std::vector<cl_float2>* input, string filename)
 		sample.y = 0;
 		try
 		{
-			double line = ::atof(inputLine.c_str());
+			float line = ::atof(inputLine.c_str());
 			sample.x = line;
 		}
 		catch (...)
@@ -146,7 +146,7 @@ std::vector<cl_float2> fft_cpu(std::vector<cl_float2> input)
 	//we do this to match the number of threads (size/2) that run on the OpenCL implementation
 	for (unsigned int i = 0; i < roots.capacity(); i++)
 	{
-		double arg = (2 * pi * (double)i) / ((double)result.capacity());
+		float arg = (2 * pi * (float)i) / ((float)result.capacity());
 		roots.at(i).x = cos(arg);
 		roots.at(i).y = -1 * sin(arg);
 	}
@@ -185,9 +185,9 @@ std::vector<cl_float2> fft_cpu(std::vector<cl_float2> input)
 			cout << "t" << thread_id << ": " << "hr" << home_root << endl;
 #endif
 
-			cl_float2 pq = doublec_mul(result.at(target_index), roots.at(home_root));
-			cl_float2 top = doublec_add(pq, result.at(home_index));
-			cl_float2 bottom = doublec_sub(result.at(home_index), pq);
+			cl_float2 pq = floatc_mul(result.at(target_index), roots.at(home_root));
+			cl_float2 top = floatc_add(pq, result.at(home_index));
+			cl_float2 bottom = floatc_sub(result.at(home_index), pq);
 			result.at(home_index) = top;
 			result.at(target_index) = bottom;
 		}

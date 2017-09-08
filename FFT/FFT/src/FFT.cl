@@ -14,7 +14,7 @@ unsigned int thread_root_map(unsigned int thread_id, unsigned int estage, unsign
 	return istage *  (thread_id % estage);
 }
 
-float2 doublec_add(float2 a, float2 b)
+float2 floatc_add(float2 a, float2 b)
 {
 	float2 c;
 	c.x = a.x + b.x;
@@ -22,7 +22,7 @@ float2 doublec_add(float2 a, float2 b)
 	return c;
 }
 
-float2 doublec_sub(float2 a, float2 b)
+float2 floatc_sub(float2 a, float2 b)
 {
 	float2 c;
 	c.x = a.x - b.x;
@@ -30,7 +30,7 @@ float2 doublec_sub(float2 a, float2 b)
 	return c;
 }
 
-float2 doublec_mul(float2 a, float2 b)
+float2 floatc_mul(float2 a, float2 b)
 {
 	float2 c;
 	c.x = a.x*b.x - a.y*b.y;
@@ -60,9 +60,9 @@ __kernel void fftKernel(__global float2* d_input, __global float2* d_roots) {
 		unsigned int target_index = home_index + estage;
 		unsigned int home_root = thread_root_map(i, estage, istage);
 
-		float2 pq = doublec_mul(d_input[target_index], d_roots[home_root]);
-		float2 top = doublec_add(pq, d_input[home_index]);
-		float2 bottom = doublec_sub(d_input[home_index], pq);
+		float2 pq = floatc_mul(d_input[target_index], d_roots[home_root]);
+		float2 top = floatc_add(pq, d_input[home_index]);
+		float2 bottom = floatc_sub(d_input[home_index], pq);
 		d_input[home_index] = top;
 		d_input[target_index] = bottom;
 
